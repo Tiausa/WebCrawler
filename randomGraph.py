@@ -12,9 +12,9 @@ def addRandomNode(start, size, edges):
     ##select random number of edged
     numEdges = random.randint(0, edges)
     for i in range(numEdges):
-        edge = str(random.randint(0, size))
+        edge = str(random.randint(0, size-1))
         while edge in node["edges"]:
-            edge = str(random.randint(0, size))
+            edge = str(random.randint(0, size-1))
         node["edges"].append(edge)
     return node
 
