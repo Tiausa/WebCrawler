@@ -1,19 +1,23 @@
-'''from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp import template
 from google.appengine.api import urlfetch
 import webapp2
 import json
+import logging
 from Parse import Sublink, WebPage
 
 # Start page
 class MainHandler(webapp2.RequestHandler):
     def get(self):
+        logging.getLogger().handlers[0].setLevel(logging.DEBUG)
         url = Sublink("http://cs467-pavo-tests.appspot.com/parse6")
         newPage = WebPage(url)
         arrayKeyword = {'haveh', 'al88so'}
-        returned = newPage.GoSearch(url, 'DFS', 2, arrayKeyword)
+        returned = newPage.GoSearch(url, 'DFS', 1, arrayKeyword)
         print ('\n\n\n\n')
+        data = []
         for i in returned:
-            print(i)
+            #print(i)
+            logging.debug(i)
         print ('\n\n\n\n')
 
 app = webapp2.WSGIApplication([('/', MainHandler),
@@ -49,7 +53,7 @@ Title = newPage.title
 print (Title)
 for i in returned:
     print(i)
-'''
+
 
 from google.appengine.ext.webapp import template
 from google.appengine.api import urlfetch

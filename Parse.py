@@ -14,7 +14,7 @@ from lxml.html.clean import Cleaner
 #from random import randint, random, choice, sample
 import random
 
-'''
+
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 from google.appengine.api import urlfetch
@@ -32,7 +32,7 @@ class Entry(ndb.Model):
     URL = ndb.StringProperty()
     Position = ndb.FloatProperty
     ParentID = ndb.JsonProperty 
-    Keyword = ndb.StringProperty() '''
+    Keyword = ndb.StringProperty()
 
 
 
@@ -132,8 +132,6 @@ class WebPage(object):
                 # add the sublink to the queue
                 SetOfURLs.add(sublink)
 
-
-
                 # parse sublink's page and get their children urls
             SublinkChildren = WebPage(sublink)
             if sublink.position < NumLevels and SublinkChildren.Code == 200:
@@ -151,24 +149,12 @@ class WebPage(object):
                         dictOrP[each.parentURL] = counterOfParents
                         each.parentNUM = counterOfParents
 
-                    #each.parentNUM =
-
                 #randomly add the children to the ListOfUrls
                 while tempList:
                     addToListOfURLs = random.choice(tempList)
                     listOrURLs.append(addToListOfURLs)
                     tempList.remove(addToListOfURLs)
                     NumberOfChildren = NumberOfChildren + 1
-
-                    #if SublinkObject.position == 0:
-                        #SublinkObject.parent = 0
-                        #hashTable[SublinkObject.URL] = 0
-                    #else:
-                        #self.parent = hashTable[SublinkObject.ancestor]
-                        #counterOfParents = + 1
-                        #hashTable[SublinkObject.URL] = counterOfParents
-
-
 
             # check if the current page has one of the given stop words
             for word in keywords:
@@ -186,7 +172,6 @@ class WebPage(object):
 # Class to represent all sublinks
 class Sublink(object):
 
-    #hashTable = {}
     counter = 0
 
     def __init__(self, address, keywords=None, ancestor=None):
@@ -229,42 +214,18 @@ class Sublink(object):
         # set position in regards to the number of ancestors above it
         self.position = 0 if ancestor is None else ancestor.position + 1
 
-        '''
-        
-        sublink.parentnumber = parentNumber
-        if ancestor is none, parent num = 0
-        else, if ancestor exists in hash, then add it's value(1)
-        else, take the global number, add one and add it to the hash table.
-        
-        '''
-
-
-
-        # if self.position == 0:
-        #     #a = urllib.urlopen(self.URL)
-        #     #TwoHundred = a.getcode()
-        #     TwoHundred = requests.head("https://stackoverflow.com")
-        #     #print(r.status_code)
-        #     if TwoHundred.status_code == 200:
-        #         #page = urlopen(self.URL)
-        #         #t = html.parse(page)
-        #         t = html.parse(self.URL)
-        #         self.title = t.find(".//title").text
-
         # Create a new Entry for only the inputed link
-        '''if self.position == 0:
+        if self.position == 0:
             newEntry = Entry()
             newEntry.Id = self.id
             newEntry.URL = self.URL
             newEntry.Position = self.position
             newEntry.ParentID = self.ancestor
             newEntry.Keyword = str(keywords).strip('[]')
-            newEntry.put()'''
+            newEntry.put()
 
     # print the sublink - this is the returned object.
     def __str__(self):
-        '''return "ancestors:%s . legal:%s . id:%s . url: %s . parent n : %s . parentURL : %s" \
-               % (self.position, self.legal, self.id, self.URL, self.parentNUM, self.parentURL)'''
 
         return "ancestors:%s . url: %s . parent n : %s . parentURL : %s" \
            % (self.position, self.URL, self.parentNUM, self.parentURL)
