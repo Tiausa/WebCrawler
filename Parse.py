@@ -35,6 +35,8 @@ class Entry(ndb.Model):
     Keyword = ndb.StringProperty() '''
 
 
+global counterOfParents
+hashTable = {}
 # The web page object- any page available on the world wide web,
 # or used for testing purposes.
 class WebPage(object):
@@ -98,16 +100,10 @@ class WebPage(object):
         keywordFound = False
         NumberOfChildren = 0
 
-
-        #a = urllib.urlopen(self.URL)
-        #TwoHundred = a.getcode()
-        TwoHundred = requests.head("https://stackoverflow.com")
-        #print(r.status_code)
-        if TwoHundred.status_code == 200:
-            #page = urlopen(self.URL)
-            #t = html.parse(page)
-            t = html.parse(self.link.URL)
-            self.title = t.find(".//title").text
+        #Get and set title of page
+        page = urllib.urlopen(self.link.URL)
+        t = html.parse(page)
+        self.title = t.find(".//title").text
 
         if keywords is None:
             keywords = []
@@ -115,21 +111,14 @@ class WebPage(object):
         if DFSorBFS != 'DFS' and DFSorBFS != 'BFS':
             return Exception("BFS or DFS not chosen correctly. ")
 
+        parentNumber = 0
+
         # while there are still sublinks in the priority queue and the keyword has not been found
         while listOrURLs and not keywordFound:
 
             # the top of the queue can be popped if it is a depth first search
             # the bottom of the queue (as in a stack) can be popped if it is breadth first search
             if "DFS" == DFSorBFS:
-                #random.shuffle(listOrURLs)
-                #listOrURLs.pop(random.randrange(len(listOrURLs.count())))
-                #sublink = listOrURLs.pop(random.choice(listOrURLs))
-
-                #
-                #random_index = randrange((len(listOrURLs) - NumberOfChildren)-1, len(listOrURLs))
-                #sublink = listOrURLs[random_index]
-                #NumberOfChildren = 0
-
                 sublink = listOrURLs.pop()
 
             if DFSorBFS == "BFS":
@@ -140,6 +129,8 @@ class WebPage(object):
             if sublink not in SetOfURLs and sublink.legal:
                 # add the sublink to the queue
                 SetOfURLs.add(sublink)
+
+
 
                 # parse sublink's page and get their children urls
             SublinkChildren = WebPage(sublink)
@@ -156,9 +147,21 @@ class WebPage(object):
                     tempList.remove(addToListOfURLs)
                     NumberOfChildren = NumberOfChildren + 1
 
+                    if SublinkObject.position == 0:
+                        SublinkObject.parent = 0
+                        hashTable[SublinkObject.URL] = 0
+                    else:
+                        self.parent = hashTable[SublinkObject.ancestor]
+                        counterOfParents = + 1
+                        hashTable[SublinkObject.URL] = counterOfParents
+
+
+
             # check if the current page has one of the given stop words
             for word in keywords:
                 keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
+
+            parentNumber = parentNumber + 1
 
         return SetOfURLs
 
@@ -170,7 +173,11 @@ class WebPage(object):
 # Class to represent all sublinks
 class Sublink(object):
 
+    #hashTable = {}
+    counter = 0
+
     def __init__(self, address, keywords=None, ancestor=None):
+
 
         # If the parent is not a valid WebPage, say so
         if ancestor:
@@ -181,6 +188,8 @@ class Sublink(object):
 
         # Set the sublink's contents
         self.ancestor = ancestor
+
+        self.parentnumber = 0
 
         # defragment the URL
         self.URL = urlparse.urldefrag(address)[0]
@@ -205,6 +214,17 @@ class Sublink(object):
         # set position in regards to the number of ancestors above it
         self.position = 0 if ancestor is None else ancestor.position + 1
 
+        '''
+        
+        sublink.parentnumber = parentNumber
+        if ancestor is none, parent num = 0
+        else, if ancestor exists in hash, then add it's value(1)
+        else, take the global number, add one and add it to the hash table.
+        
+        '''
+
+
+
         # if self.position == 0:
         #     #a = urllib.urlopen(self.URL)
         #     #TwoHundred = a.getcode()
@@ -228,11 +248,11 @@ class Sublink(object):
 
     # print the sublink - this is the returned object.
     def __str__(self):
-        return "ancestors:%s . legal:%s . id:%s . url: %s " \
-               % (self.position, self.legal, self.id, self.URL)
+        return "ancestors:%s . legal:%s . id:%s . url: %s . parent n : %s" \
+               % (self.position, self.legal, self.id, self.URL, self.parentnumber)
 
     def ReturnJSON(self):
-        return {"title" : "", "found " : self.legal,}
+        return {"title" : "", "found " : self.legal}
 
 
 
