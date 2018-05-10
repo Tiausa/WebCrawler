@@ -44,12 +44,11 @@ url = Sublink("http://cs467-pavo-tests.appspot.com/parse6")
 newPage = WebPage(url)
 #tester = Sublink(newPage)
 arrayKeyword = {'hav66e', 'Al7so'}
-returned = newPage.GoSearch(url, 'DFS', 3, arrayKeyword)
+returned = newPage.GoSearch(url, 'BFS', 4, arrayKeyword)
 Title = newPage.title
 print (Title)
 for i in returned:
     print(i)
-    
 '''
 
 from google.appengine.ext.webapp import template

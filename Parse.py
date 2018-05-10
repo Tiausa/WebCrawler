@@ -31,15 +31,16 @@ class Entry(ndb.Model):
     Id = ndb.StringProperty()
     URL = ndb.StringProperty()
     Position = ndb.FloatProperty
-    ParentID = ndb.JsonProperty
+    ParentID = ndb.JsonProperty 
     Keyword = ndb.StringProperty() '''
 
 
-global counterOfParents
-hashTable = {}
+
+dictOrP = {}
 # The web page object- any page available on the world wide web,
 # or used for testing purposes.
 class WebPage(object):
+
 
     # Creates a new WebPage object from a link
     def __init__(self, sublink):
@@ -99,6 +100,7 @@ class WebPage(object):
 
         keywordFound = False
         NumberOfChildren = 0
+        counterOfParents = 0
 
         #Get and set title of page
         page = urllib.urlopen(self.link.URL)
@@ -136,9 +138,20 @@ class WebPage(object):
             SublinkChildren = WebPage(sublink)
             if sublink.position < NumLevels and SublinkChildren.Code == 200:
                 tempList = []
+
                 for each in SublinkChildren.ReturnAllChildWebPages():
                     each.position = sublink.position + 1
                     tempList.append(each)
+                    each.parentURL = sublink.URL
+
+                    if dictOrP.get(each.parentURL) is not None:
+                        each.parentNUM = dictOrP.get(each.parentURL)
+                    else:
+                        counterOfParents += 1
+                        dictOrP[each.parentURL] = counterOfParents
+                        each.parentNUM = counterOfParents
+
+                    #each.parentNUM =
 
                 #randomly add the children to the ListOfUrls
                 while tempList:
@@ -147,13 +160,13 @@ class WebPage(object):
                     tempList.remove(addToListOfURLs)
                     NumberOfChildren = NumberOfChildren + 1
 
-                    if SublinkObject.position == 0:
-                        SublinkObject.parent = 0
-                        hashTable[SublinkObject.URL] = 0
-                    else:
-                        self.parent = hashTable[SublinkObject.ancestor]
-                        counterOfParents = + 1
-                        hashTable[SublinkObject.URL] = counterOfParents
+                    #if SublinkObject.position == 0:
+                        #SublinkObject.parent = 0
+                        #hashTable[SublinkObject.URL] = 0
+                    #else:
+                        #self.parent = hashTable[SublinkObject.ancestor]
+                        #counterOfParents = + 1
+                        #hashTable[SublinkObject.URL] = counterOfParents
 
 
 
@@ -190,6 +203,8 @@ class Sublink(object):
         self.ancestor = ancestor
 
         self.parentnumber = 0
+        self.parentURL = "Start Page"
+        self.parentNUM = 0
 
         # defragment the URL
         self.URL = urlparse.urldefrag(address)[0]
@@ -248,8 +263,11 @@ class Sublink(object):
 
     # print the sublink - this is the returned object.
     def __str__(self):
-        return "ancestors:%s . legal:%s . id:%s . url: %s . parent n : %s" \
-               % (self.position, self.legal, self.id, self.URL, self.parentnumber)
+        '''return "ancestors:%s . legal:%s . id:%s . url: %s . parent n : %s . parentURL : %s" \
+               % (self.position, self.legal, self.id, self.URL, self.parentNUM, self.parentURL)'''
+
+        return "ancestors:%s . url: %s . parent n : %s . parentURL : %s" \
+           % (self.position, self.URL, self.parentNUM, self.parentURL)
 
     def ReturnJSON(self):
         return {"title" : "", "found " : self.legal}
