@@ -1,20 +1,14 @@
-# from the web
+
 import re
 import hashlib
 import urllib
-
-
 import requests
-# sitePackages.path.append('/path/to/application/app/folder')
 from lxml import html
-
-# from urllib.parse import urljoin
 import urlparse
 from lxml.html.clean import Cleaner
-#from random import randint, random, choice, sample
 import random
-
-
+'''
+#This is for google app engine
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 from google.appengine.api import urlfetch
@@ -33,7 +27,7 @@ class Entry(ndb.Model):
     Position = ndb.FloatProperty
     ParentID = ndb.JsonProperty 
     Keyword = ndb.StringProperty()
-
+'''
 
 
 dictOrP = {}
@@ -165,10 +159,6 @@ class WebPage(object):
         return SetOfURLs
 
 
-
-
-
-
 # Class to represent all sublinks
 class Sublink(object):
 
@@ -215,18 +205,17 @@ class Sublink(object):
         self.position = 0 if ancestor is None else ancestor.position + 1
 
         # Create a new Entry for only the inputed link
-        if self.position == 0:
+        '''if self.position == 0:
             newEntry = Entry()
             newEntry.Id = self.id
             newEntry.URL = self.URL
             newEntry.Position = self.position
             newEntry.ParentID = self.ancestor
             newEntry.Keyword = str(keywords).strip('[]')
-            newEntry.put()
+            newEntry.put()'''
 
     # print the sublink - this is the returned object.
     def __str__(self):
-
         return "ancestors:%s . url: %s . parent n : %s . parentURL : %s" \
            % (self.position, self.URL, self.parentNUM, self.parentURL)
 
@@ -237,7 +226,6 @@ class Sublink(object):
 
 # Source: https://stackoverflow.com/questions/3073881/clean-up-html-in-python/6482979
 # Removes html tags, such that only words are reviewed (such that we can find the keyword)
-# All methods are staticmethods, so that no object needs to be built.
 class HTMLUtils(object):
     HTML_CLEANER = Cleaner(**{
         'scripts': True,
