@@ -191,6 +191,7 @@ class WebPage(object):
 
             # this link has not been seen before
             if sublink not in InQueue and sublink.legal:
+            #if sublink.legal:
                 # add the sublink to the queue
                 InQueue.add(sublink)
 
@@ -265,9 +266,17 @@ class WebPage(object):
                         if responser == True:
                             node['edges'] = []
 
+
+                if sublink.getUrl() in graph:
+                    node1 = graph[sublink.getUrl()]
+                    node['edges'] += node1['edges']
+                    graph[sublink.getUrl()] = node
+
+
                 # add node to the graph
                 if sublink.getUrl() not in graph:
                     node['title'] = sublink.getTitle()
+
                     graph[sublink.getUrl()] = node
                 # check if the current page has one of the given stop words
 
