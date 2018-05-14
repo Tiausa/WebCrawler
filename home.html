@@ -18,7 +18,7 @@
       <p><a href="{{ parse6 }}">Test 6 - muliple links + garbage</a></p>
       <p><a href="{{ parse7 }}">Test 7 - multiple links to same location</a></p>
       <p><a href="{{ parse8 }}">Test 8 - link in source code</a></p>
-      <p><a href="http://thispagedoesnotexist.com">Test 9 - links to non-existant page, should result in 404 error</a></p>
+      <p><a href="{{ parse9 }}">Test 9 - links to non-existant page</a></p>
 
     <h3>Crawler</h3>
       <p><a href="{{ graph1 }}">Test 1 - one node</a></p>
@@ -29,6 +29,9 @@
       <p><a href="{{ graph6a }}">Test 6 - three nodes, loop</a></p>
       <p><a href="{{ graph7 }}">Test 7 - one node, points to itself</a></p>
       <p><a href="{{ graph8a }}">Test 8 - 3 nodes, max edges</a></p>
+      <p><a href="{{ graph9 }}">Test 9 - keyword Bob</a></p>
+      <p><a href="{{ graph10 }}">Test 10 - keyword Bob in next link</a></p>
+      <p><a href="{{ graph11a }}">Test 11 - large graph, used for testing limit</a></p>
 </body>
 </html>
 </!DOCTYPE>
