@@ -63,8 +63,6 @@ class WebPage(object):
 
     # helper function to return links of children of a webpage
     def ReturnAllChildrenLinks(self):
-        #temp = [page.getUrl() for page in self.children]
-        #print(temp)
         return [page.getUrl() for page in self.children]
 
     # Source: https://stackoverflow.com/questions/5319922/python-check-if-word-is-in-a-string
@@ -174,9 +172,6 @@ class WebPage(object):
                             node['title'] = sublink.getTitle()
                             graph[sublink.getUrl()] = node
 
-                        #if responser == True:
-                            #return
-
                     # check if the current page has one of the given stop words
                     for word in keywords:
                         keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
@@ -230,17 +225,6 @@ class WebPage(object):
                         responser = True
                 node['found'] = responser  # temporary placeholder till words are implemented
 
-
-
-
-
-                #responser = False
-                #for word in keywords:
-                    #keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
-                    #if keywordFound:
-                        #responser = 'found'
-                #node['found'] = responser # temporary placeholder till words are implemented
-
                 if sublink.position == NumLevels or responser == True:
                     node['edges'] = []
 
@@ -286,13 +270,6 @@ class WebPage(object):
                     node['title'] = sublink.getTitle()
                     graph[sublink.getUrl()] = node
                 # check if the current page has one of the given stop words
-
-                #if responser == 'found':
-                    #return
-
-            # check if the current page has one of the given stop words
-            #for word in keywords:
-                #keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
 
 
 # Class to represent all sublinks
