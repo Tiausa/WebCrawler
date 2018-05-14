@@ -84,6 +84,13 @@ class WebPage(object):
         keywordFound = False
         graph = {}
 
+        try:
+            page = urllib.urlopen(SublinkObject.URL)
+            t = html.parse(page)
+            SublinkObject.title = t.find(".//title").text
+        except:
+            pass
+
 
         if keywords is None:
             keywords = []
@@ -105,76 +112,78 @@ class WebPage(object):
         while priorityQueue and not keywordFound:
 
             sublink = priorityQueue.pop(0)
+            if sublink.legal:
 
-            # this link has not been seen before
-            if sublink not in InQueue and sublink.legal:
-                # add the sublink to the queue
-                InQueue.add(sublink)
+                # this link has not been seen before
+                if sublink not in InQueue and sublink.legal:
+                    # add the sublink to the queue
+                    InQueue.add(sublink)
 
-            # parse sublink's page and get their children urls
-            SublinkChildren = WebPage(sublink)
-            if sublink.position <= NumLevels and SublinkChildren.Code == 200:
-                # create a node to add to graph
-                node = {}
+                    # parse sublink's page and get their children urls
+                    SublinkChildren = WebPage(sublink)
+                    if sublink.position <= NumLevels and SublinkChildren.Code == 200:
+                        # create a node to add to graph
+                        node = {}
 
-                # Get the web page
-                sublink.link = sublink
-                global response
-                try:
-                    response = requests.get(sublink.URL)
-                except requests.exceptions.ConnectionError:
-                    Exception("Connection refused")
-                if response: sublink.encoding = response.encoding
-                sublink.Tags = response.text.encode('utf8')
-
-                # removes tags from words in web page
-                NoTags = HTMLUtils.HTML_CLEANER.clean_html(sublink.Tags)
-
-                JustWords = html.fromstring(NoTags).text_content()
-                JustWords = re.sub(r'/\s+/g', ' ', JustWords).strip()
-                sublink.Text = JustWords
-
-                responser = False
-                for word in keywords:
-                    keywordFound = keywordFound or sublink.findWholeWord1(word)(sublink.Text)
-                    if keywordFound:
-                        responser = True
-                node['found'] = responser # temporary placeholder till words are implemented
-
-                #node['found'] = False  # temporary placeholder till words are implemented
-                if sublink.position == NumLevels or responser == True:
-                    node['edges'] = []
-                else:
-                    node['edges'] = SublinkChildren.ReturnAllChildrenLinks()
-                    # continue crawling children
-                    counter1 = 0
-                    for each in SublinkChildren.ReturnAllChildWebPages():
-                        each.position = sublink.position + 1
-                        counter1 += 1
-
+                        # Get the web page
+                        sublink.link = sublink
+                        global response
                         try:
-                            page = urllib.urlopen(each.URL)
-                            t = html.parse(page)
-                            each.title = t.find(".//title").text
-                        except:
-                            pass
+                            response = requests.get(sublink.URL)
+                        except requests.exceptions.ConnectionError:
+                            Exception("Connection refused")
+                        if response: sublink.encoding = response.encoding
+                        sublink.Tags = response.text.encode('utf8')
 
-                        priorityQueue.append(each)
+                        # removes tags from words in web page
+                        NoTags = HTMLUtils.HTML_CLEANER.clean_html(sublink.Tags)
 
-                # add node to the graph
-                if sublink.getUrl() not in graph:
-                    node['title'] = sublink.getTitle()
-                    graph[sublink.getUrl()] = node
+                        JustWords = html.fromstring(NoTags).text_content()
+                        JustWords = re.sub(r'/\s+/g', ' ', JustWords).strip()
+                        sublink.Text = JustWords
 
-                #if responser == True:
-                    #return
+                        responser = False
+                        for word in keywords:
+                            keywordFound = keywordFound or sublink.findWholeWord1(word)(sublink.Text)
+                            if keywordFound:
+                                responser = True
+                        node['found'] = responser # temporary placeholder till words are implemented
 
-            # check if the current page has one of the given stop words
-            for word in keywords:
-                keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
+                        #node['found'] = False  # temporary placeholder till words are implemented
+                        if sublink.position == NumLevels or responser == True:
+                            node['edges'] = []
+                        else:
+                            node['edges'] = SublinkChildren.ReturnAllChildrenLinks()
+                            # continue crawling children
+                            counter1 = 0
+                            for each in SublinkChildren.ReturnAllChildWebPages():
+                                each.position = sublink.position + 1
+                                counter1 += 1
+
+                                try:
+                                    page = urllib.urlopen(each.URL)
+                                    t = html.parse(page)
+                                    each.title = t.find(".//title").text
+                                except:
+                                    pass
+
+                                priorityQueue.append(each)
+
+                        # add node to the graph
+                        if sublink.getUrl() not in graph:
+                            node['title'] = sublink.getTitle()
+                            graph[sublink.getUrl()] = node
+
+                        #if responser == True:
+                            #return
+
+                    # check if the current page has one of the given stop words
+                    for word in keywords:
+                        keywordFound = keywordFound or self.findWholeWord(word)(self.Text)
 
     def DFSearch(self, InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue):
 
+        NumLevels += 1
         # while there are still sublinks in the priority queue and the keyword has not been found
         while priorityQueue and not keywordFound:
 

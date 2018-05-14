@@ -20,8 +20,12 @@ from Nparse import Sublink, WebPage
 #url = Sublink("http://cs467-pavo-tests.appspot.com/graph7")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph8/a")
 #url = Sublink("http://cs467-pavo-tests.appspot.com/graph9")
-url = Sublink("http://cs467-pavo-tests.appspot.com/graph10")
+#url = Sublink("http://cs467-pavo-tests.appspot.com/graph10")
+#url = Sublink("http://cs467-pavo-tests.appspot.com/graph11/a")
+#url = Sublink("https://sterritmspyware.wordpress.com/2018/02/01/trojan-spyware-sneaks-into-your-keyboard/")
+#url = Sublink("https://sterritmspyware.wordpress.com/")
 # #url = Sublink("http://bl.ocks.org/rkirsling/5001347")
+url = Sublink("wikipedia.com")
 #
 #
 # newPage = WebPage(url)
@@ -45,7 +49,10 @@ url = Sublink("http://cs467-pavo-tests.appspot.com/graph10")
 newPage = WebPage(url)
 sentString = 'Bob'
 arrayKeyword = {sentString}
-urls = newPage.GoSearch(url, 'DFS', 5, arrayKeyword)
+if sentString == '':
+    urls = newPage.GoSearch(url, 'BFS', 1)
+else:
+    urls = newPage.GoSearch(url, 'BFS', 1, arrayKeyword)
 
 dict = {}
 dict['URLs'] = urls
@@ -55,8 +62,8 @@ print json.dumps(dict, indent=4, sort_keys=True)
 
 
 
-
 '''
+
 import webapp2
 import urllib
 import urllib2
@@ -83,8 +90,11 @@ class MainPage(webapp2.RequestHandler):
         url = Sublink(data['page'])
         newPage = WebPage(url)
         sentString = data['keyword']
-        arrayKeyword = {sentString}
-        urls = newPage.GoSearch(url, data['method'], data['limit'], arrayKeyword)
+        if sentString == '':
+            urls = newPage.GoSearch(url, data['method'], data['limit'])
+        else:
+            arrayKeyword = {sentString}
+            urls = newPage.GoSearch(url, data['method'], data['limit'], arrayKeyword)
         dict = {}
         dict['URLs'] = urls
         dict['start'] = url.getUrl()
@@ -98,6 +108,6 @@ class MainPage(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage)
-], debug=True)'''
+], debug=True)
 
-
+'''
