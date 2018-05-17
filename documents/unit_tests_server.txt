@@ -1,0 +1,71 @@
+JSON to server:
+		
+	valid json, no cookie, no keyword, depth
+		{
+		  "page": "www.example.com",
+		   "method": "depth",
+		   "limit": 2
+		}
+		
+	valid json, no cookie, no keyword, breadth
+		{
+		  "page": "www.example.com",
+		   "method": "breadth",
+		   "limit": 2
+		}
+	valid json, no cookie, keyword
+		{
+		  "page": "www.example.com",
+		   "method": "depth",
+		   "limit": 2,
+		   "keyword": "bob"
+		}
+		
+	valid json, with only cookie and method
+		{
+		   "method": "depth",
+		   "cookie": "abc123"
+		}
+		
+	valid json with cookie + page and keyword
+		{
+		  "page": "www.example.com",
+		   "method": "depth",
+		   "limit": 2,
+		   "keyword": "bob",
+		   "cookie": "abc123"
+		}
+	
+	invalid page data type
+		{
+		  "page": 123,
+		   "method": "depth",
+		   "limit": 2
+		}
+	invalid method
+		{
+		  "page": "www.example.com",
+		   "method": "binary",
+		   "limit": 2
+		}
+		
+	invalid limit data type
+		{
+		  "page": "www.example.com",
+		   "method": "binary",
+		   "limit": 100000
+		}
+		
+	invalid keyword data type
+		{
+		  "page": "www.example.com",
+		   "method": "binary",
+		   "limit": 2,
+		   "keyword": 1
+		}
+		
+	invalid cookie data type
+		{
+		   "method": "depth",
+		   "cookie": 123
+		}
