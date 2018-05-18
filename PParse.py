@@ -78,12 +78,12 @@ class WebPage(object):
             if url and url[0] == '/':
                 url = self.findDomain() + url
 
-                # validate the URL
-                try:
-                    response = requests.get(url)
-                except:
-                    response = 404
-            if response != 404  and response.status_code < 400:
+            # validate the URL
+            try:
+                response = requests.get(url)
+            except:
+                response = 404
+            if response != 404 and response.status_code < 400:
                 webpages.append(Sublink(url, self.link))
         return webpages
 
@@ -131,7 +131,9 @@ class WebPage(object):
         if DFSorBFS == "BFS":
             self.BFSearch(InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue)
         else:
-            self.DFSearch(InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue)
+            PriorityQList = []
+            PriorityQList.append(SublinkObject)
+            self.DFSearch2(InQueue, NumLevels, graph, keywordFound, keywords, PriorityQList)
 
         return graph
 
@@ -316,6 +318,101 @@ class WebPage(object):
                     node['edges'] += node1['edges']
                     graph[sublink.getUrl()] = node
 
+
+                # add node to the graph
+                if sublink.getUrl() not in graph:
+                    node['title'] = sublink.getTitle()
+
+                    graph[sublink.getUrl()] = node
+                # check if the current page has one of the given stop words
+
+    def DFSearch2(self, InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue):
+
+        NumLevels += 1
+        # while there are still sublinks in the priority queue and the keyword has not been found
+        while priorityQueue and not keywordFound:
+
+            KeepGoing = True
+            while KeepGoing is True and len(priorityQueue) > 0:
+                sublink = priorityQueue.pop()
+                SublinkChildren = WebPage(sublink)
+                KeepGoing = SublinkChildren.Bad
+
+            priorityQueue = []
+
+            # this link has not been seen before
+            if sublink not in InQueue and sublink.legal:
+                InQueue.add(sublink)
+
+            # parse sublink's page and get their children urls
+
+            if sublink.position < NumLevels and SublinkChildren.Code == 200:
+
+                # create a node to add to graph
+                node = {}
+
+                # Get the web page
+                sublink.link = sublink
+                global response
+                try:
+                    response = requests.get(sublink.URL)
+                except requests.exceptions.ConnectionError:
+                    Exception("Connection refused")
+                if response: sublink.encoding = response.encoding
+                sublink.Tags = response.text.encode('utf8')
+
+                # removes tags from words in web page
+                NoTags = HTMLUtils.HTML_CLEANER.clean_html(sublink.Tags)
+
+                JustWords = html.fromstring(NoTags).text_content()
+                JustWords = re.sub(r'/\s+/g', ' ', JustWords).strip()
+                sublink.Text = JustWords
+
+                responser = False
+                for word in keywords:
+                    keywordFound = keywordFound or sublink.findWholeWord1(word)(sublink.Text)
+                    if keywordFound:
+                        responser = True
+                node['found'] = responser  # temporary placeholder till words are implemented
+
+                if sublink.position == NumLevels or responser == True:
+                    node['edges'] = []
+
+                else:
+                    # continue crawling children
+                    #for each in SublinkChildren.ReturnAllChildWebPages():
+                        #node['edges'] = each.URL
+                    if len(SublinkChildren.children) is not 0:
+                        #sublink2 = random.randrange(0, len(SublinkChildren.children))
+                        sublink2 = random.choice(SublinkChildren.children)
+                        sublink2.position = sublink.position + 1
+
+
+                        try:
+                            # page = urllib.urlopen(each.URL)
+                            # t = html.parse(page)
+                            # each.title = t.find(".//title").text
+
+                            source = urllib2.urlopen(sublink2.URL)
+                            BS = BeautifulSoup(source)
+                            sublink2.title = BS.find('title').text
+                        except:
+                            pass
+
+                        priorityQueue.append(sublink2)
+
+                        toAdd = WebPage(sublink2)
+                        if sublink2.position < NumLevels and toAdd.Bad is not True:
+                            node['edges'] = [sublink2.getUrl()]
+                        else:
+                            node['edges'] = []
+                        if responser == True:
+                            node['edges'] = []
+
+                if sublink.getUrl() in graph:
+                    node1 = graph[sublink.getUrl()]
+                    node['edges'] += node1['edges']
+                    graph[sublink.getUrl()] = node
 
                 # add node to the graph
                 if sublink.getUrl() not in graph:
