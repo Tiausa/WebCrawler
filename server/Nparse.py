@@ -28,7 +28,7 @@ class WebPage(object):
 
         # If the link is not valid, say so
         if not isinstance(sublink, Sublink) or not sublink.legal:
-            raise Exception("Invalid link. Please provide a valid link")
+            raise Exception("Invalid link. Please provide a valid link - " + sublink.getUrl())
 
         # Get the web page
         self.link = sublink
@@ -51,11 +51,22 @@ class WebPage(object):
         # Get the links for the children
         self.children = self.FindAllURLs()
 
+    def findDomain(self):
+        parsed_uri = urlparse.urlparse(self.link.getUrl())
+        domain = '{uri.scheme}://{uri.netloc}'.format(uri=parsed_uri)
+        return domain
+
     # Find all of the URLs connected to that site
     def FindAllURLs(self):
         returned = html.fromstring(self.Tags)
         WebSite = set([urlparse.urldefrag(each)[0] for each in returned.xpath('//a[@href]/@href')])
-        return [Sublink(url, self.link) for url in WebSite]
+        webpages = []
+        for url in WebSite:
+            if url and url[0] == '/':
+                url = self.findDomain() + url
+            webpages.append(Sublink(url, self.link))
+        return webpages
+        #return [Sublink(url, self.link) for url in WebSite]
 
     # helper function to return all the children of a webpage
     def ReturnAllChildWebPages(self):
@@ -242,7 +253,8 @@ class WebPage(object):
                             each.title = t.find(".//title").text
                         except:
                             pass
-
+                        #if each.getUrl()[0] == '/':
+                        #    each.URL = sublink.getUrl() + each.getUrl()
                         priorityQueue.append(each)
 
                     if len(priorityQueue) is 0 or responser == True:
@@ -302,6 +314,9 @@ class Sublink(object):
         # defragment the URL
         self.URL = urlparse.urldefrag(address)[0]
 
+        #if self.URL[0] == '/':
+        #    self.URL = 'bobo'
+
         # parse the URL
         self.authority = urlparse.urlparse(address).netloc
 
@@ -322,15 +337,6 @@ class Sublink(object):
         # set position in regards to the number of ancestors above it
         self.position = 0 if ancestor is None else ancestor.position + 1
 
-        # Create a new Entry for only the inputed link
-        # if self.position == 0:
-        #    newEntry = Entry()
-        #    newEntry.Id = self.id
-        #    newEntry.URL = self.URL
-        #    newEntry.Position = self.position
-        #    newEntry.ParentID = self.ancestor
-        #    newEntry.Keyword = str(keywords).strip('[]')
-        #    newEntry.put()
 
     # returns url for page
     def getUrl(self):

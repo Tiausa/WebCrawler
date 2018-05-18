@@ -52,6 +52,10 @@ GRAPH_VALUES = {'parse1': ROOT_URL + '/parse1',
                 'graph11l': ROOT_URL + '/graph11/l',
                 'graph11m': ROOT_URL + '/graph11/m',
                 'graph11n': ROOT_URL + '/graph11/n',
+                'tia1': ROOT_URL + '/tia1',
+                'test1': '//support.twitter.com/groups/31-twitter-basics/topics/104-welcome-to-twitter-support/articles/215585-twitter-101-how-should-i-get-started-using-twitter',
+                'tia2': ROOT_URL + '/tia2',
+                'test2': '/graph1'
                 }
 
 ## generates a random string of length n, used to randomly generate state variable
@@ -303,6 +307,16 @@ class Graph11nHandle(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'graph11n.html')
         self.response.write(template.render(path, GRAPH_VALUES))
 
+class Tia1Handle(webapp2.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), 'tia1.html')
+        self.response.write(template.render(path, GRAPH_VALUES))
+
+class Tia2Handle(webapp2.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), 'tia2.html')
+        self.response.write(template.render(path, GRAPH_VALUES))
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/parse1', Parse1Handle),
@@ -343,5 +357,7 @@ app = webapp2.WSGIApplication([
     ('/graph11/k', Graph11kHandle),
     ('/graph11/l', Graph11lHandle),
     ('/graph11/m', Graph11mHandle),
-    ('/graph11/n', Graph11nHandle)
+    ('/graph11/n', Graph11nHandle),
+    ('/tia1', Tia1Handle),
+    ('/tia2', Tia2Handle)
 ], debug=True)
