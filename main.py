@@ -5,7 +5,7 @@ from QParse import Sublink, WebPage
 #url = Sublink("http://cs467-pavo-tests.appspot.com/parse2")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse3")
 #url = Sublink("http://cs467-pavo-tests.appspot.com/parse4")
-#url = Sublink("http://cs467-pavo-tests.appspot.com/parse5")
+url = Sublink("http://cs467-pavo-tests.appspot.com/parse5")
 #url = Sublink("http://cs467-pavo-tests.appspot.com/parse6")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse7")
 #url = Sublink("http://cs467-pavo-tests.appspot.com/parse8")
@@ -31,7 +31,7 @@ from QParse import Sublink, WebPage
 
 #url = Sublink("https://sterritmspyware.wordpress.com/")
 # #url = Sublink("http://bl.ocks.org/rkirsling/5001347")
-url = Sublink("http://www.wikipedia.com")
+#url = Sublink("http://www.wikipedia.com")
 #https://cloudcsproject.appspot.com/welcome
 #
 #
@@ -58,9 +58,9 @@ sentString = ''
 arrayKeyword = {sentString}
 #print ("In here and going on...")
 if sentString == '':
-    urls = newPage.GoSearch(url, 'DFS', 1)
+    urls = newPage.GoSearch(url, 'BFS', 1)
 else:
-    urls = newPage.GoSearch(url, 'DFS', 1, arrayKeyword)
+    urls = newPage.GoSearch(url, 'BFS', 1, arrayKeyword)
 #print ("In here and going on 222...")
 dict = {}
 dict['URLs'] = urls

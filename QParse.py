@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 import re
 import hashlib
 import urllib
@@ -12,14 +16,8 @@ import random
 from datetime import datetime
 random.seed(datetime.now())
 from BeautifulSoup import BeautifulSoup
+import codecs
 
-
-# class Entry(ndb.Model):
-#    Id = ndb.StringProperty()
-#    URL = ndb.StringProperty()
-#    Position = ndb.FloatProperty
-#    ParentID = ndb.JsonProperty
-#    Keyword = ndb.StringProperty()
 
 
 # The web page object- any page available on the world wide web,
@@ -27,7 +25,7 @@ from BeautifulSoup import BeautifulSoup
 class WebPage(object):
 
     # Creates a new WebPage object from a link
-    def __init__(self, sublink):
+    def __init__(self, sublink, Letter=None):
 
         self.Bad = False
         self.Code = 404
@@ -60,7 +58,10 @@ class WebPage(object):
         self.Code = response.status_code
 
         # Get the links for the children
-        self.children = self.FindAllURLs()
+        if Letter == 'B':
+            self.children = self.FindAllURLs()
+        else:
+            self.children = {}
 
     def findDomain(self):
         parsed_uri = urlparse.urlparse(self.link.getUrl())
@@ -152,7 +153,7 @@ class WebPage(object):
                     InQueue.add(sublink)
 
                     # parse sublink's page and get their children urls
-                    SublinkChildren = WebPage(sublink)
+                    SublinkChildren = WebPage(sublink, 'B')
                     if SublinkChildren.Bad is not True:
 
                         if sublink.position <= NumLevels and SublinkChildren.Code == 200:
@@ -341,12 +342,12 @@ class WebPage(object):
             priorityQueue = []
 
             # this link has not been seen before
-            if sublink not in InQueue and sublink.legal:
+            if sublink not in InQueue:
                 InQueue.add(sublink)
 
             # parse sublink's page and get their children urls
 
-            if sublink.position < NumLevels and SublinkChildren.Code == 200:
+            if sublink.position < NumLevels:
 
                 # create a node to add to graph
                 node = {}
@@ -382,43 +383,82 @@ class WebPage(object):
                     # continue crawling children
                     #for each in SublinkChildren.ReturnAllChildWebPages():
                         #node['edges'] = each.URL
-                    if len(SublinkChildren.children) is not 0:
-                        #sublink2 = random.randrange(0, len(SublinkChildren.children))
-                        sublink2 = random.choice(SublinkChildren.children)
+
+                    returned = html.fromstring(self.Tags)
+                    WebSite1 = set([urlparse.urldefrag(each)[0] for each in returned.xpath('//a[@href]/@href')])
+                    WebSite = list(WebSite1)
+
+                    #for url in WebSite:
+
+                    if len(WebSite) is not 0:
+                        # sublink2 = random.randrange(0, len(SublinkChildren.children))
+
+                        KeepGoing = True
+                        while KeepGoing:
+                            JustTheURL = random.choice(WebSite)
+                            sublink2 = Sublink(JustTheURL)
+
+                            if sublink2.URL and sublink2.URL[0] == '/' and sublink2.URL[1] and sublink2.URL[1] == '/':
+                                sublink2.URL = 'http:' + sublink2.URL
+
+
+                            elif sublink2.URL and sublink2.URL[0] == '/':
+                                sublink2.URL = self.findDomain() + sublink2.URL
+
+                            # validate the URL
+                            try:
+                                response = requests.get(sublink2.URL)
+                            except:
+                                response = 404
+                            if response != 404 and response.status_code < 400:
+                                KeepGoing = False
+
+
                         sublink2.position = sublink.position + 1
 
+                        '''if len(SublinkChildren.children) is not 0:
+                        #sublink2 = random.randrange(0, len(SublinkChildren.children))
+                        sublink2 = random.choice(SublinkChildren.children)
+                        sublink2.position = sublink.position + 1'''
 
-                        try:
+
+                        '''try:
                             # page = urllib.urlopen(each.URL)
                             # t = html.parse(page)
                             # each.title = t.find(".//title").text
 
                             source = urllib2.urlopen(sublink2.URL)
                             BS = BeautifulSoup(source)
-                            sublink2.title = BS.find('title').text
+                            testT = BS.find('title').text.decode('utf-8')
+                            if testT == "":
+                                testT =  u'%s' % testT.encode('utf-8')
+                            #t = testT.decode("utf-8")
+                            sublink2.title = testT
+                            print("hello")
+
                         except:
-                            pass
+                            pass'''
 
                         priorityQueue.append(sublink2)
 
                         toAdd = WebPage(sublink2)
-                        if sublink2.position < NumLevels and toAdd.Bad is not True:
+                        if sublink2.position < NumLevels: # and toAdd.Bad is not True:
                             node['edges'] = [sublink2.getUrl()]
                         else:
                             node['edges'] = []
                         if responser == True:
                             node['edges'] = []
 
-                if sublink.getUrl() in graph:
-                    node1 = graph[sublink.getUrl()]
-                    node['edges'] += node1['edges']
-                    graph[sublink.getUrl()] = node
+                        if sublink.getUrl() in graph:
+                            node1 = graph[sublink.getUrl()]
+                            node['edges'] += node1['edges']
+                            node['title'] = sublink.getTitle()
+                            graph[sublink.getUrl()] = node
 
-                # add node to the graph
-                if sublink.getUrl() not in graph:
-                    node['title'] = sublink.getTitle()
-
-                    graph[sublink.getUrl()] = node
+                        # add node to the graph
+                        if sublink.getUrl() not in graph:
+                            node['title'] = sublink.getTitle()
+                            graph[sublink.getUrl()] = node
                 # check if the current page has one of the given stop words
 
 
@@ -480,6 +520,17 @@ class Sublink(object):
 
     # returns title for page, temporary placeholder of empty string
     def getTitle(self):
+
+        source = urllib2.urlopen(self.URL)
+        BS = BeautifulSoup(source)
+        #BS = BeautifulSoup(source, from_encoding="utf-8")
+        #testT = BS.find('title').text.encode('ascii', 'ignore').decode('ascii')
+        testT = BS.find('title').text
+        #testT = BS.find('title').text.decode('utf-8')
+        #if testT == "":
+            #testT = u'%s' % testT.encode('utf-8')
+        # t = testT.decode("utf-8")
+        self.title = testT
         return self.title
 
     # print the sublink - this is the returned object.
