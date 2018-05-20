@@ -44,14 +44,23 @@ for (var i = 0; i < urls.length; i++) {
 		var k = {
 			source: nodes[i], target: nodes[y] , left: false, right: true
 		};
-		if (k["source"] != k["target"]) {
+	    //check if the reverse arrow already exists
+		var reverse = false;
+		for (var m = 0; m < links.length; m++) {
+		    if (k.source == links[m].target && k.target == links[m].source) {
+		        links[m].left = true;
+		        reverse = true;
+		        break;
+		    }
+		}
+		          
+		if (!reverse && k["source"] != k["target"]) {
 			links.push(k);
 		}
-		//links.push(k);
-		//console.log(links);
-		//console.log(k);
 	}
 }
+
+console.log(links);
 
 // init D3 force layout
 var force = d3.layout.force()
@@ -92,15 +101,15 @@ var path = svg.append('svg:g').selectAll('path'),
 
 // mouse event vars
 var selected_node = null,
-	selected_link = null,
-	mousedown_link = null,
-	mousedown_node = null,
-	mouseup_node = null;
+    selected_link = null,
+    mousedown_link = null,
+    mousedown_node = null,
+    mouseup_node = null;
 
 function resetMouseVars() {
-	mousedown_node = null;
-	mouseup_node = null;
-	mousedown_link = null;
+    mousedown_node = null;
+    mouseup_node = null;
+    mousedown_link = null;
 }
 
 // update force layout (called automatically each iteration)
@@ -128,6 +137,7 @@ function tick() {
 
 // update graph (called when needed)
 function restart() {
+    console.log(nodes);
 	// path (link) group
 	path = path.data(links);
 
@@ -151,6 +161,7 @@ function restart() {
 			if (mousedown_link === selected_link) selected_link = null;
 			else selected_link = mousedown_link;
 			selected_node = null;
+			console.log('bob');
 			restart();
 		});
 
@@ -164,23 +175,39 @@ function restart() {
 		.attr('class', 'node')
 		.attr('r', 12)
 		//		.style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
-		.style('fill', function (d) { return (d.keyword) ? "red" : "lightGreen"; })	//change node color if keyword is found red is true
+		.style('fill', function (d) {
+		    var color = "lightGreen";
+		    //change node color if keyword is found red is true
+		    if (d.keyword)
+		        color = "red";
+		        //change node color to dark green if it is the start page
+		    else if (d.id == obj["start"])
+		        color = "darkGreen";
+		    return color;
+		})
 		.style('stroke', "black")
 		.classed('reflexive', function (d) { return d.reflexive; })
 
-	// show node IDs
-	g.append('svg:text')
-		.attr('x', 0)
-		.attr('y', 4)
-		.attr('class', 'id')
-		.text(function (d) { return d.id; });
 
-	g.append('svg:text')
-		.attr('x', 10)
-		.attr('y', 14)
-		.attr('class', 'title')
-		.text(function (d) { console.log(d); return d.title; });
-		
+	g.on("mouseover", function (d) {
+	    var g = d3.select(this); // The node
+	    // The class is used to remove the additional text later
+	    var info = g.append('svg:text')
+           .classed('info', true)
+           .attr('x', 20)
+           .attr('y', 10)
+           .text(function (d) { return d.id; });
+	    var info = g.append('svg:text')
+           .classed('infoTitle', true)
+           .attr('x', 20)
+           .attr('y', 20)
+           .text(function (d) { return d.title; });
+	})
+    g.on("mouseout", function () {
+        // Remove the info text on mouse out.
+        d3.select(this).select('text.info').remove();
+        d3.select(this).select('text.infoTitle').remove();
+    });
 
 	// remove old nodes
 	circle.exit().remove();
@@ -189,14 +216,16 @@ function restart() {
 	force.start();
 }
 
+function mousedown() {
+    // prevent I-bar on drag
+    //d3.event.preventDefault();
+
+    // because :active only works in WebKit?
+    svg.classed('active', true);
+
+}
 
 function mouseup() {
-	if (mousedown_node) {
-		// hide drag line
-		drag_line
-			.classed('hidden', true)
-			.style('marker-end', '');
-	}
 
 	// because :active only works in WebKit?
 	svg.classed('active', false);
@@ -236,6 +265,8 @@ function keyup() {
 	}
 }
 
+svg.on('mousedown', mousedown)
+  .on('mouseup', mouseup);
 d3.select(window)
 	.on('keydown', keydown)
 	.on('keyup', keyup);
