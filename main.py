@@ -5,7 +5,7 @@
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse2")
 # # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse3")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse4")
-# url = Sublink("http://cs467-pavo-tests.appspot.com/parse5")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/parse5")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse6")
 # # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse7")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse8")
@@ -83,7 +83,7 @@ from google.appengine.ext.webapp import template
 #from Parse import Sublink, Webpage
 
 import logging
-from Nparse import Sublink, WebPage
+from QParse import Sublink, WebPage
 
 
 
@@ -117,6 +117,6 @@ class MainPage(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage)
-], debug=True) 
+], debug=True)
 
 
