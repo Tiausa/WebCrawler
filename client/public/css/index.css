@@ -1,0 +1,27 @@
+﻿body {
+	background-image: url(../images/spiderWeb.jpg);
+}
+
+#section{
+	background-color: white;
+	border:solid;
+}
+
+@font-face{
+	font-family: spiderText2;
+	src: url('../images/SPIDERMA.TTF');
+}
+
+@font-face{
+	font-family: spiderText;
+	src: url('../images/LT White Fang.ttf');
+}
+
+h1{
+	font-family: spiderText2;
+	font-size: 4em;
+}
+
+/*Vlegend{
+	font-family: 'Franklin Gothic';
+}*/

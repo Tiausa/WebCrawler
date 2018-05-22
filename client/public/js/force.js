@@ -1,14 +1,15 @@
-﻿// set up SVG for D3
+﻿//set up SVG for D3
 var width = 800,
 	height = 600,
 	colors = d3.scale.category10();
+
+
 
 var svg = d3.select('body')
 	.append('svg')
 	.attr('oncontextmenu', 'return false;')
 	.attr('width', width)
 	.attr('height', height);
-
 //var obj = JSON.parse('{ "URLs": {"www.google.com": {"edges": ["www.zzz.com"], "found": false, "title": "title0"}, "www.zzz.com": { "edges": [], "found": false, "title": "title1" }}, "cookie": "graph 3", "start": "0"}');
 //var obj = JSON.parse('{"start": "0", "cookie": "test7903", "URLs": {"0": {"found": true, "edges": ["1"], "title": "title0"}, "1": {"found": false, "edges": ["0"], "title": "title1"}, "2": {"found": false, "edges": ["0"], "title": "title2"}, "3": {"found": false, "edges": ["2", "1"], "title": "title3"}, "4": {"found": false, "edges": [], "title": "title4"}}}');
 var obj = JSON.parse(document.getElementById("script").getAttribute("jsonObj"));
@@ -44,12 +45,19 @@ for (var i = 0; i < urls.length; i++) {
 		var k = {
 			source: nodes[i], target: nodes[y] , left: false, right: true
 		};
-		if (k["source"] != k["target"]) {
+		//check if the reverse arrow already exists
+		var reverse = false;
+		for (var m = 0; m < links.length; m++) {
+			if (k.source == links[m].target && k.target == links[m].source) {
+				links[m].left = true;
+				reverse = true;
+				break;
+			}
+		}
+
+		if (!reverse && k["source"] != k["target"]) {
 			links.push(k);
 		}
-		//links.push(k);
-		//console.log(links);
-		//console.log(k);
 	}
 }
 
@@ -164,22 +172,61 @@ function restart() {
 		.attr('class', 'node')
 		.attr('r', 12)
 		//		.style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
-		.style('fill', function (d) { return (d.keyword) ? "red" : "lightGreen"; })	//change node color if keyword is found red is true
+		//.style('fill', function (d) { return (d.keyword) ? "red" : "lightGreen"; })	//change node color if keyword is found red is true
+		.style('fill', function (d) {
+			var color = "lightGreen";
+			//change node color if keyword is found red is true
+			if (d.keyword)
+				color = "red";
+			//change node color to dark green if it is the start page
+			else if (d.id == obj["start"])
+				color = "blue";
+			return color;
+		})
 		.style('stroke', "black")
 		.classed('reflexive', function (d) { return d.reflexive; })
 
-	// show node IDs
-	g.append('svg:text')
-		.attr('x', 0)
-		.attr('y', 4)
-		.attr('class', 'id')
-		.text(function (d) { return d.id; });
+		//g.on("click", function (d) {
+		//	window.open(d.id);
+		//})
+		g.on("dblclick", dblclick);
 
-	g.append('svg:text')
-		.attr('x', 10)
-		.attr('y', 14)
-		.attr('class', 'title')
-		.text(function (d) { console.log(d); return d.title; });
+		g.on("mouseover", function (d) {
+			var g = d3.select(this); // The node
+
+			//console.log(g);
+			// The class is used to remove the additional text later
+			var info = g.append('svg:text')
+				.classed('info', true)
+				.attr('x', 20)
+				.attr('y', 10)
+				.text(function (d) { return d.id; });
+			var moreinfo = g.append('svg:text')
+				.classed('moreinfo', true)
+				.attr('x', 20)
+				.attr('y', 25)
+				.text(function (d) { return d.title; });
+
+		})
+		g.on("mouseout", function () {
+			// Remove the info text on mouse out.
+			d3.select(this).select('text.info').remove();
+			d3.select(this).select('text.moreinfo').remove();
+		});
+
+	// show node IDs
+	//g.append('svg:text')
+	//	.attr('x', 0)
+	//	.attr('y', 4)
+	//	.attr('class', 'id')
+	//	.text(function (d) { return d.id; });
+
+	//g.append('svg:text')
+	//	.attr('x', 10)
+	//	.attr('y', 14)
+	//	.attr('class', 'title')
+	//	.text(function (d) { console.log(d); return d.title; });
+
 		
 
 	// remove old nodes
@@ -234,6 +281,10 @@ function keyup() {
 			.on('touchstart.drag', null);
 		svg.classed('ctrl', false);
 	}
+}
+
+function dblclick(a) {
+	window.open(a.id);
 }
 
 d3.select(window)
