@@ -1,22 +1,22 @@
 # import json
 # #
 # from QParse import Sublink, WebPage
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse1")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/parse1")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse2")
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse3")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/parse3")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse4")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse5")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse6")
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse7")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/parse7")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse8")
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse9")
-# #
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph1")
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph2")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/parse9")
+#
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/graph1")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/graph2")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph3/a")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph4")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph5/a")
-# # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph6/a")
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/graph6/a")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph7")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph8/a")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph9")
@@ -24,51 +24,25 @@
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/graph11/a")
 #
 #
+# #url = Sublink("http://cs467-pavo-tests.appspot.com/tia1")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/tia2")
 # #url = Sublink("https://sterritmspyware.wordpress.com/2018/02/01/trojan-spyware-sneaks-into-your-keyboard/")
-# #url = Sublink("http://cs467-pavo-tests.appspot.com/tia2")
-#
 #
 # #url = Sublink("https://sterritmspyware.wordpress.com/")
-# # #url = Sublink("http://bl.ocks.org/rkirsling/5001347")
-# url = Sublink("http://www.wikipedia.com")
-# #https://cloudcsproject.appspot.com/welcome
-# #
-# #
-# # newPage = WebPage(url)
-# # #tester = Sublink(newPage)
-# # arrayKeyword = {'hav66e', 'Al7so'}
-# # returned = newPage.GoSearch(url, 'BFS', 2, arrayKeyword)
-# # Title = newPage.title
-# # print (Title)
-# # for i in returned:
-# #     print(i)'''
-# # '''
-# # newPage = WebPage(url)
-# # arrayKeyword = {'hav66e', 'Als6o'}
-# # urls = newPage.GoSearch(url, 'BFS', 2)
-# # dict = {}
-# # dict['URLs'] = urls
-# # dict['start'] = url.getUrl()
-# # dict['cookie'] = 'temp'
-# # print json.dumps(dict, indent=4, sort_keys=True)'''
-# #
+# url = Sublink("http://bl.ocks.org/rkirsling/5001347")
+# #url = Sublink("http://www.wikipedia.com")
+#
 # newPage = WebPage(url)
 # sentString = ''
 # arrayKeyword = {sentString}
-# #print ("In here and going on...")
 # if sentString == '':
-#     urls = newPage.GoSearch(url, 'DFS', 3)
+#     urls = newPage.GoSearch(url, 'DFS', 5)
 # else:
-#     urls = newPage.GoSearch(url, 'DFS', 3, arrayKeyword)
-# #print ("In here and going on 222...")
+#     urls = newPage.GoSearch(url, 'DFS', 5, arrayKeyword)
 # dict = {}
 # dict['URLs'] = urls
 # dict['start'] = url.getUrl()
-# #print ("In here and going on 333...")
-# #dict['cookie'] = 'temp'
 # print json.dumps(dict, indent=4, sort_keys=True)
-
 
 
 
@@ -83,7 +57,7 @@ from google.appengine.ext.webapp import template
 #from Parse import Sublink, Webpage
 
 import logging
-from QParse import Sublink, WebPage
+from Works_butSlow import Sublink, WebPage
 
 
 
@@ -118,5 +92,6 @@ class MainPage(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainPage)
 ], debug=True)
+
 
 

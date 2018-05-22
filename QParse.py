@@ -14,15 +14,18 @@ import urlparse
 from lxml.html.clean import Cleaner
 import random
 from datetime import datetime
+
+
 random.seed(datetime.now())
 from BeautifulSoup import BeautifulSoup
+from lxml.html import fromstring
 import codecs
-
 
 
 # The web page object- any page available on the world wide web,
 # or used for testing purposes.
 class WebPage(object):
+
 
     # Creates a new WebPage object from a link
     def __init__(self, sublink, Letter=None):
@@ -41,12 +44,18 @@ class WebPage(object):
 
         # Get the web page
         self.link = sublink
-        global response
+        response = None
         try:
             response = requests.get(sublink.URL)
         except requests.exceptions.ConnectionError:
             Exception("Connection refused")
         if response: self.encoding = response.encoding
+
+
+        tree = fromstring(response.content)
+        self.link.title = tree.findtext('.//title')
+
+
         self.Tags = response.text.encode('utf8')
 
         # removes tags from words in web page
@@ -162,7 +171,7 @@ class WebPage(object):
 
                             # Get the web page
                             sublink.link = sublink
-                            global response
+                            response = None
                             try:
                                 response = requests.get(sublink.URL)
                             except requests.exceptions.ConnectionError:
@@ -216,7 +225,7 @@ class WebPage(object):
 
     def DFSearch(self, InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue):
 
-        NumLevels += 1
+        NumLevels = NumLevels + 1
         # while there are still sublinks in the priority queue and the keyword has not been found
         while priorityQueue and not keywordFound:
 
@@ -245,7 +254,7 @@ class WebPage(object):
 
                 # Get the web page
                 sublink.link = sublink
-                global response
+                response = None
                 try:
                     response = requests.get(sublink.URL)
                 except requests.exceptions.ConnectionError:
@@ -329,136 +338,146 @@ class WebPage(object):
 
     def DFSearch2(self, InQueue, NumLevels, graph, keywordFound, keywords, priorityQueue):
 
-        NumLevels += 1
+        #NumLevels = NumLevels + 1
         # while there are still sublinks in the priority queue and the keyword has not been found
         while priorityQueue and not keywordFound:
 
             KeepGoing = True
             while KeepGoing is True and len(priorityQueue) > 0:
-                sublink = priorityQueue.pop()
-                SublinkChildren = WebPage(sublink)
-                KeepGoing = SublinkChildren.Bad
+                currentSublink = priorityQueue.pop()
+                currentSublinkWebpage = WebPage(currentSublink)
+                KeepGoing = currentSublinkWebpage.Bad
 
             priorityQueue = []
 
             # this link has not been seen before
-            if sublink not in InQueue:
-                InQueue.add(sublink)
+            if currentSublink not in InQueue:
+                InQueue.add(currentSublink)
 
             # parse sublink's page and get their children urls
 
-            if sublink.position < NumLevels:
+            if currentSublink.position < NumLevels:
 
                 # create a node to add to graph
                 node = {}
 
                 # Get the web page
-                sublink.link = sublink
-                global response
+                #currentSublink.link = currentSublink
+                response = ""
                 try:
-                    response = requests.get(sublink.URL)
+                    response = requests.get(currentSublink.URL)
                 except requests.exceptions.ConnectionError:
                     Exception("Connection refused")
-                if response: sublink.encoding = response.encoding
-                sublink.Tags = response.text.encode('utf8')
+                if response: currentSublink.encoding = response.encoding
+                currentSublink.Tags = response.text.encode('utf8')
 
                 # removes tags from words in web page
-                NoTags = HTMLUtils.HTML_CLEANER.clean_html(sublink.Tags)
+                NoTags = HTMLUtils.HTML_CLEANER.clean_html(currentSublink.Tags)
 
                 JustWords = html.fromstring(NoTags).text_content()
                 JustWords = re.sub(r'/\s+/g', ' ', JustWords).strip()
-                sublink.Text = JustWords
+                currentSublink.Text = JustWords
 
                 responser = False
                 for word in keywords:
-                    keywordFound = keywordFound or sublink.findWholeWord1(word)(sublink.Text)
+                    keywordFound = keywordFound or currentSublink.findWholeWord1(word)(currentSublink.Text)
                     if keywordFound:
                         responser = True
                 node['found'] = responser  # temporary placeholder till words are implemented
 
-                if sublink.position == NumLevels or responser == True:
+                if currentSublink.position == NumLevels or responser == True:
                     node['edges'] = []
+                    node['title'] = currentSublink.getTitle()
+                    graph[currentSublink.getUrl()] = node
 
                 else:
                     # continue crawling children
                     #for each in SublinkChildren.ReturnAllChildWebPages():
                         #node['edges'] = each.URL
 
-                    returned = html.fromstring(self.Tags)
+                    returned = html.fromstring(currentSublink.Tags)
                     WebSite1 = set([urlparse.urldefrag(each)[0] for each in returned.xpath('//a[@href]/@href')])
                     WebSite = list(WebSite1)
 
                     #for url in WebSite:
+
+                    if len(WebSite) is 0:
+                        node['edges'] = []
+                        node['title'] = currentSublink.getTitle()
+                        graph[currentSublink.getUrl()] = node
+                        return
 
                     if len(WebSite) is not 0:
                         # sublink2 = random.randrange(0, len(SublinkChildren.children))
 
                         KeepGoing = True
                         while KeepGoing:
+                            if len(WebSite) is 0:
+                                node['edges'] = []
+                                node['title'] = currentSublink.getTitle()
+                                graph[currentSublink.getUrl()] = node
+                                return
+
                             JustTheURL = random.choice(WebSite)
-                            sublink2 = Sublink(JustTheURL)
+                            WebSite.remove(JustTheURL)
+                            #if len(WebSite) is 0:
+                                #return
 
-                            if sublink2.URL and sublink2.URL[0] == '/' and sublink2.URL[1] and sublink2.URL[1] == '/':
-                                sublink2.URL = 'http:' + sublink2.URL
+                            childOfCurrentSublink = Sublink(JustTheURL)
+
+                            if childOfCurrentSublink.URL and childOfCurrentSublink.URL[0] == '/' and len(childOfCurrentSublink.URL) > 1 and childOfCurrentSublink.URL[1] == '/':
+                                childOfCurrentSublink.URL = 'http:' + childOfCurrentSublink.URL
 
 
-                            elif sublink2.URL and sublink2.URL[0] == '/':
-                                sublink2.URL = self.findDomain() + sublink2.URL
+                            elif childOfCurrentSublink.URL and childOfCurrentSublink.URL[0] == '/':
+                                childOfCurrentSublink.URL = self.findDomain() + childOfCurrentSublink.URL
 
                             # validate the URL
                             try:
-                                response = requests.get(sublink2.URL)
+                                response = requests.get(childOfCurrentSublink.URL)
                             except:
                                 response = 404
                             if response != 404 and response.status_code < 400:
                                 KeepGoing = False
 
 
-                        sublink2.position = sublink.position + 1
+                        childOfCurrentSublink.position = currentSublink.position + 1
 
-                        '''if len(SublinkChildren.children) is not 0:
-                        #sublink2 = random.randrange(0, len(SublinkChildren.children))
-                        sublink2 = random.choice(SublinkChildren.children)
-                        sublink2.position = sublink.position + 1'''
+                        priorityQueue.append(childOfCurrentSublink)
 
+                        #toAdd = WebPage(childOfCurrentSublink)
+                        if childOfCurrentSublink.position < NumLevels: # and toAdd.Bad is not True:
+                            node['edges'] = [childOfCurrentSublink.getUrl()]
 
-                        '''try:
-                            # page = urllib.urlopen(each.URL)
-                            # t = html.parse(page)
-                            # each.title = t.find(".//title").text
-
-                            source = urllib2.urlopen(sublink2.URL)
-                            BS = BeautifulSoup(source)
-                            testT = BS.find('title').text.decode('utf-8')
-                            if testT == "":
-                                testT =  u'%s' % testT.encode('utf-8')
-                            #t = testT.decode("utf-8")
-                            sublink2.title = testT
-                            print("hello")
-
-                        except:
-                            pass'''
-
-                        priorityQueue.append(sublink2)
-
-                        toAdd = WebPage(sublink2)
-                        if sublink2.position < NumLevels: # and toAdd.Bad is not True:
-                            node['edges'] = [sublink2.getUrl()]
-                        else:
+                        if childOfCurrentSublink.position > NumLevels:
                             node['edges'] = []
-                        if responser == True:
-                            node['edges'] = []
+                            node['title'] = currentSublink.getTitle()
+                            graph[currentSublink.getUrl()] = node
+                            return
 
-                        if sublink.getUrl() in graph:
-                            node1 = graph[sublink.getUrl()]
+                        if currentSublink.getUrl() in graph:
+                            node1 = graph[currentSublink.getUrl()]
+                            if not node.has_key('edges'):
+                                node['edges'] = []
                             node['edges'] += node1['edges']
-                            node['title'] = sublink.getTitle()
-                            graph[sublink.getUrl()] = node
+                            node['title'] = currentSublink.getTitle()
+                            graph[currentSublink.getUrl()] = node
 
                         # add node to the graph
-                        if sublink.getUrl() not in graph:
-                            node['title'] = sublink.getTitle()
-                            graph[sublink.getUrl()] = node
+                        if currentSublink.getUrl() not in graph:
+                            node['title'] = currentSublink.getTitle()
+
+
+                            #######
+                            node['edges'] = [childOfCurrentSublink.URL]
+
+                            ##########
+                            graph[currentSublink.getUrl()] = node
+
+
+                        if responser == True:
+                            node['edges'] = []
+                            graph[currentSublink.getUrl()] = node
                 # check if the current page has one of the given stop words
 
 
@@ -521,16 +540,11 @@ class Sublink(object):
     # returns title for page, temporary placeholder of empty string
     def getTitle(self):
 
-        source = urllib2.urlopen(self.URL)
+        '''source = urllib2.urlopen(self.URL)
         BS = BeautifulSoup(source)
-        #BS = BeautifulSoup(source, from_encoding="utf-8")
-        #testT = BS.find('title').text.encode('ascii', 'ignore').decode('ascii')
         testT = BS.find('title').text
-        #testT = BS.find('title').text.decode('utf-8')
-        #if testT == "":
-            #testT = u'%s' % testT.encode('utf-8')
-        # t = testT.decode("utf-8")
-        self.title = testT
+        self.title = testT'''
+
         return self.title
 
     # print the sublink - this is the returned object.
