@@ -46,8 +46,9 @@
         <legend>Repeat Search:</legend>
         <select name="cookies">
             <option value="">Select One:</option>
+            <!--Parse object into a stringified json object for value-->
             {{#each cookies}}
-            <option value="{{this}}">{{this}}</option>
+            <option value='{"page":"{{this.page}}","method":"{{this.method}}","limit":{{this.limit}},"keyword":"{{this.keyword}}"}'>{{this.page}} - {{this.keyword}}</option>
             {{/each}}
         </select>
         <input name="submitButton" type="submit" value="Repeat search" />

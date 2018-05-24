@@ -26,15 +26,21 @@ app.post("/results", function (req, res) {
         payload.method = req.body.method;
         payload.keyword = req.body.keyword;
         var payloadJson = JSON.stringify(payload);
+        console.log(payload);
 
-        //console.log(JSON.stringify(payload));
         //get previous cookies for count
         var cookies = cookie.parse(req.headers.cookie || '');
-        //console.log(cookies);
+
         //create cookie with search information
         setCookie('myCookie' + Object.keys(cookies).length, payloadJson, { path: '/', res: res });
     } else {
         var payloadJson = req.body.cookies;
+        console.log(payloadJson);
+        //if select none was clicked, then redirect back to homepage
+        if (payloadJson == "") {
+            res.redirect("/");
+            return;
+        }
     }
 
     console.log(payloadJson);
@@ -55,14 +61,25 @@ app.post("/results", function (req, res) {
 	} else {
 		alert('Error!');
 	}
-
-
 });
 
 app.get("/", function (req, res) {
     var cookies = cookie.parse(req.headers.cookie || '');
-    res.render("index", { 'cookies': cookies });
+    //revert cookies back to an array of json objects
+    var parsedCookies = [];
+    var keys = Object.keys(cookies);
+    for (var i = 0; i < keys.length; i++) {
+        try {
+            parsedCookies.push(JSON.parse(cookies[keys[i]]));
+        } catch(SyntaxError) {
+            console.log("Error");
+        }
+        //parsedCookies.push(JSON.parse(cookies[keys[i]]));
+    }
+    //render page
+    res.render("index", { 'cookies': parsedCookies });
 });
+
 
 app.get("/force", function (req, res) {
 	res.render("force");
