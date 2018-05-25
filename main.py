@@ -57,7 +57,7 @@ from google.appengine.ext.webapp import template
 #from Parse import Sublink, Webpage
 
 import logging
-from Works_butSlow import Sublink, WebPage
+from QParse import Sublink, WebPage
 
 
 
@@ -65,25 +65,34 @@ from Works_butSlow import Sublink, WebPage
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
-        self.response.write("hello world!")
+        try:
+            self.response.write("hello world!")
+        except Exception as e:
+            self.response.set_status(500)
+            self.response.out.write(json.dumps(self))
 
     def post(self):
-        data = json.loads(self.request.body)
-        ## Tia's code here
-        url = Sublink(data['page'])
-        newPage = WebPage(url)
-        sentString = data['keyword']
-        if sentString == '':
-            urls = newPage.GoSearch(url, data['method'], data['limit'])
-        else:
-            arrayKeyword = {sentString}
-            urls = newPage.GoSearch(url, data['method'], data['limit'], arrayKeyword)
-        dict = {}
-        dict['URLs'] = urls
-        dict['start'] = url.getUrl()
-        dict['cookie'] = 'temp'
+        try:
+            data = json.loads(self.request.body)
+            ## Tia's code here
+            url = Sublink(data['page'])
+            newPage = WebPage(url)
+            sentString = data['keyword']
+            if sentString == '':
+                urls = newPage.GoSearch(url, data['method'], data['limit'])
+            else:
+                arrayKeyword = {sentString}
+                urls = newPage.GoSearch(url, data['method'], data['limit'], arrayKeyword)
+            dict = {}
+            dict['URLs'] = urls
+            dict['start'] = url.getUrl()
+            dict['cookie'] = 'temp'
 
-        self.response.write(json.dumps(dict))
+            self.response.write(json.dumps(dict))
+        except Exception as e:
+            self.response.set_status(500)
+            self.response.out.write(json.dumps(self))
+
 
 
 # [END main_page]

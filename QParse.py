@@ -449,7 +449,7 @@ class WebPage(object):
                         if childOfCurrentSublink.position < NumLevels: # and toAdd.Bad is not True:
                             node['edges'] = [childOfCurrentSublink.getUrl()]
 
-                        if childOfCurrentSublink.position > NumLevels:
+                        if childOfCurrentSublink.position >= NumLevels:
                             node['edges'] = []
                             node['title'] = currentSublink.getTitle()
                             graph[currentSublink.getUrl()] = node
