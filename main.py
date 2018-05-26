@@ -86,7 +86,6 @@ class MainPage(webapp2.RequestHandler):
             dict = {}
             dict['URLs'] = urls
             dict['start'] = url.getUrl()
-            dict['cookie'] = 'temp'
 
             self.response.write(json.dumps(dict))
         except Exception as e:
