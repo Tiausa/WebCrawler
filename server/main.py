@@ -1,6 +1,6 @@
 import json
 #
-from Nparse import Sublink, WebPage
+from QParse import Sublink, WebPage
 # # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse1")
 # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse2")
 # # #url = Sublink("http://cs467-pavo-tests.appspot.com/parse3")
@@ -46,15 +46,15 @@ from Nparse import Sublink, WebPage
 # # dict['cookie'] = 'temp'
 # # print json.dumps(dict, indent=4, sort_keys=True)'''
 # #
-url = Sublink("https://en.wikipedia.org/wiki/Flame_(malware)")
+url = Sublink("http://cs467-pavo-tests.appspot.com/graph10")
 
 newPage = WebPage(url)
-sentString = ''
+sentString = 'Bob'
 arrayKeyword = {sentString}
 if sentString == '':
-    urls = newPage.GoSearch(url, 'DFS', 1)
+    urls = newPage.GoSearch(url, 'DFS', 5)
 else:
-    urls = newPage.GoSearch(url, 'DFS', 1, arrayKeyword)
+    urls = newPage.GoSearch(url, 'DFS', 5, arrayKeyword)
 
 dict = {}
 dict['URLs'] = urls
